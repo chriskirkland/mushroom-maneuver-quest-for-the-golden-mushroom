@@ -1,0 +1,10 @@
+{
+  "name": "mushroom-maneuver-quest-for-the-golden-mushroom",
+  "version": "1.0.0",
+  "description": "Mushroom Maneuver: Quest for the Golden Mushroom — a browser side-scroller",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "start": "npx --yes http-server -c-1 -p 8080 ."
+  }
+}
