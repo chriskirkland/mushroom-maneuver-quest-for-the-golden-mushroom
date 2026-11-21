@@ -62,6 +62,10 @@
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
 
+  function swingBox(hero) {
+    return { x: hero.facing > 0 ? hero.x + hero.w - 4 : hero.x - 46, y: hero.y - 6, w: 50, h: hero.h + 10 };
+  }
+
   function floatText(x, y, text, color) {
     world.floaters.push({ x, y, text, color: color || '#fff', t: 1.2 });
   }
@@ -116,6 +120,18 @@
       });
     }
 
+    const bossType = L.bossForStage(stage);
+    if (bossType) {
+      const base = L.ENEMIES[bossType];
+      const st = L.enemyStats(bossType, stage);
+      const x = length - 160;
+      const y = GROUND_Y - base.h;
+      enemies.push({
+        type: bossType, x, y, baseY: y, w: base.w, h: base.h, hp: st.maxHp, maxHp: st.maxHp, atk: st.atk,
+        speed: st.speed, dir: -1, home: x, range: 80, hurt: 0, stun: 0, phase: 0,
+      });
+    }
+
     const golden = (stage === L.GOLDEN_MUSHROOM_LEVEL && !player.foundGoldenMushroom)
       ? { x: length - 220, y: GROUND_Y - 40, w: 32, h: 40 } : null;
 
@@ -128,7 +144,7 @@
       rand,
       hero: {
         x: 60, y: GROUND_Y - 46, w: 34, h: 46, vx: 0, vy: 0, onGround: true, facing: 1,
-        swing: 0, cooldown: 0, invuln: 0, swingHits: null,
+        swing: 0, cooldown: 0, invuln: 0, swingHits: null, miningSwing: false,
       },
     };
   }
@@ -215,6 +231,7 @@
       hero.swing = 0.2;
       hero.cooldown = 0.38;
       hero.swingHits = new Set();
+      hero.miningSwing = world.nodes.some((n) => overlaps(swingBox(hero), n));
     }
 
     // Potion
@@ -248,7 +265,7 @@
     // Swing resolution
     if (hero.swing > 0) {
       hero.swing -= dt;
-      const box = { x: hero.facing > 0 ? hero.x + hero.w - 4 : hero.x - 46, y: hero.y - 6, w: 50, h: hero.h + 10 };
+      const box = swingBox(hero);
       for (const e of world.enemies) {
         if (hero.swingHits.has(e) || !overlaps(box, e)) continue;
         hero.swingHits.add(e);
@@ -256,12 +273,13 @@
         const dmg = Math.max(1, Math.round(atk * (0.85 + world.rand() * 0.3)));
         e.hp -= dmg;
         e.hurt = 0.2;
-        e.x += hero.facing * 18;
+        L.knockBackEnemy(e, hero, world.length);
         floatText(e.x + e.w / 2, e.y - 6, `-${dmg}`, '#ffeb3b');
       }
       for (const n of world.nodes) {
         if (hero.swingHits.has(n) || !overlaps(box, n)) continue;
         hero.swingHits.add(n);
+        hero.miningSwing = true;
         n.hits -= 1;
         n.shake = 0.15;
         if (n.hits <= 0) {
@@ -285,6 +303,7 @@
       else if (e.x < e.home - e.range) e.dir = 1;
       else if (e.x > e.home + e.range) e.dir = -1;
       if (e.stun <= 0) e.x += e.dir * e.speed * (chasing ? 1.25 : 1) * dt;
+      e.x = Math.max(0, Math.min(world.length - e.w, e.x));
       if (base.flying) {
         e.phase += dt * 3;
         e.y = e.baseY + Math.sin(e.phase) * 40 + (chasing ? Math.max(-60, Math.min(60, hero.y - e.baseY)) * 0.5 : 0);
@@ -339,6 +358,9 @@
     }
 
     // Town gate
+    if (world.enemies.some((e) => L.ENEMIES[e.type].boss)) {
+      hero.x = Math.min(hero.x, world.gate.x + 20 - hero.w);
+    }
     if (hero.x + hero.w > world.gate.x + 20) {
       goToTown();
       return;
@@ -470,10 +492,23 @@
         ctx.beginPath(); ctx.arc(x + w / 2, y + 10, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         break;
       case 'toad':
+      case 'toad_king':
         ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * 0.6, w / 2, h * 0.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#9e9e9e';
         ctx.fillRect(x + w * 0.25, y, w * 0.5, h * 0.25); // helmet
         ctx.strokeRect(x + w * 0.25, y, w * 0.5, h * 0.25);
+        if (base.boss) {
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath();
+          ctx.moveTo(x + w * 0.2, y);
+          ctx.lineTo(x + w * 0.2, y - 16);
+          ctx.lineTo(x + w * 0.4, y - 6);
+          ctx.lineTo(x + w * 0.5, y - 20);
+          ctx.lineTo(x + w * 0.6, y - 6);
+          ctx.lineTo(x + w * 0.8, y - 16);
+          ctx.lineTo(x + w * 0.8, y);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
         break;
       default:
         ctx.fillRect(x, y, w, h);
@@ -485,11 +520,17 @@
     ctx.fillStyle = '#c62828';
     ctx.beginPath(); ctx.arc(ex + e.dir, y + h * 0.35, 2, 0, Math.PI * 2); ctx.fill();
     // HP bar
-    if (e.hp < e.maxHp) {
+    if (e.hp < e.maxHp || base.boss) {
       ctx.fillStyle = '#000';
       ctx.fillRect(x, y - 10, w, 5);
       ctx.fillStyle = '#e53935';
       ctx.fillRect(x, y - 10, w * Math.max(0, e.hp / e.maxHp), 5);
+    }
+    if (base.boss) {
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 14px "Trebuchet MS", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(base.name, x + w / 2, y - 26);
     }
     ctx.restore();
   }
@@ -523,7 +564,7 @@
     ctx.fillStyle = '#fff8e1';
     ctx.font = 'bold 15px "Trebuchet MS", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('TOWN ➜', g.x + g.w / 2, g.y + 8);
+    ctx.fillText(world.enemies.some((e) => L.ENEMIES[e.type].boss) ? 'BOSS FIRST' : 'TOWN ➜', g.x + g.w / 2, g.y + 8);
     // Little houses behind the gate
     for (let i = 0; i < 3; i++) {
       const hx = g.x + 120 + i * 70;
@@ -627,7 +668,7 @@
     if (hero.swing > 0) {
       const weapon = player.equipped.weapon;
       const colors = { twig_sword: '#8d6e63', copper_sword: '#c87533', iron_sword: '#9aa0a6', silver_sword: '#eceff1', golden_blade: '#ffd700', crystal_blade: '#b388ff' };
-      ctx.strokeStyle = colors[weapon] || '#fff';
+      ctx.strokeStyle = hero.miningSwing ? '#8d6e63' : colors[weapon] || '#fff';
       ctx.lineWidth = 6;
       ctx.lineCap = 'round';
       const cx = hero.x + hero.w / 2;
@@ -639,6 +680,18 @@
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(ang) * 46, cy + Math.sin(ang) * 46);
       ctx.stroke();
+      if (hero.miningSwing) {
+        ctx.save();
+        ctx.translate(cx + Math.cos(ang) * 40, cy + Math.sin(ang) * 40);
+        ctx.rotate(ang);
+        ctx.strokeStyle = '#cfd8dc';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(-5, -17);
+        ctx.quadraticCurveTo(9, 0, -5, 17);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     ctx.textAlign = 'center';
