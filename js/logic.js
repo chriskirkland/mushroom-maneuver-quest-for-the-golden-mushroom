@@ -9,6 +9,7 @@
   const GAME_TITLE = 'Mushroom Maneuver: Quest for the Golden Mushroom';
   const MAX_PLAYER_LEVEL = 50;
   const GOLDEN_MUSHROOM_LEVEL = 10;
+  const WEAPON_KNOCKBACK = 24;
 
   const MINERALS = {
     copper: { name: 'Copper Ore', value: 6, xp: 4, minStage: 1, hits: 2, color: '#c87533' },
@@ -43,6 +44,7 @@
     bat: { name: 'Spore Bat', hp: 28, atk: 10, speed: 90, xp: 12, coins: [5, 10], minStage: 3, w: 36, h: 24, color: '#6a1b9a', flying: true },
     goblin: { name: 'Rot Goblin', hp: 60, atk: 14, speed: 80, xp: 20, coins: [8, 16], minStage: 5, w: 34, h: 48, color: '#558b2f' },
     toad: { name: 'Toad Knight', hp: 110, atk: 20, speed: 60, xp: 35, coins: [15, 30], minStage: 7, w: 48, h: 52, color: '#2e7d32' },
+    toad_king: { name: 'Toad King', hp: 100, atk: 10, speed: 50, xp: 50, coins: [30, 50], minStage: 3, w: 72, h: 78, color: '#1b5e20', boss: true },
   };
 
   const ENCHANTMENTS = {
@@ -116,6 +118,12 @@
     return Math.max(1, Math.round(rawAttack - defensePower(player) * 0.6));
   }
 
+  function knockBackEnemy(enemy, hero, length) {
+    const direction = Math.sign((enemy.x + enemy.w / 2) - (hero.x + hero.w / 2)) || hero.facing;
+    enemy.x = Math.max(0, Math.min(length - enemy.w, enemy.x + direction * WEAPON_KNOCKBACK));
+    enemy.stun = Math.max(enemy.stun, 0.18);
+  }
+
   // ---------- World helpers ----------
 
   function mineralsForStage(stage) {
@@ -123,7 +131,11 @@
   }
 
   function enemiesForStage(stage) {
-    return Object.keys(ENEMIES).filter((id) => ENEMIES[id].minStage <= stage);
+    return Object.keys(ENEMIES).filter((id) => !ENEMIES[id].boss && ENEMIES[id].minStage <= stage);
+  }
+
+  function bossForStage(stage) {
+    return stage > 0 && stage % 3 === 0 ? 'toad_king' : null;
   }
 
   /** Picks a random mineral, weighting towards the more common (lower tier) ones. */
@@ -317,8 +329,8 @@
   const api = {
     GAME_TITLE, MAX_PLAYER_LEVEL, GOLDEN_MUSHROOM_LEVEL,
     MINERALS, ITEMS, ENEMIES, ENCHANTMENTS,
-    createNewPlayer, xpToNextLevel, addXp, maxHp, attackPower, defensePower, damageTaken,
-    mineralsForStage, enemiesForStage, pickMineral, enemyStats,
+    createNewPlayer, xpToNextLevel, addXp, maxHp, attackPower, defensePower, damageTaken, knockBackEnemy,
+    mineralsForStage, enemiesForStage, bossForStage, pickMineral, enemyStats,
     mineMineral, defeatEnemy,
     mineralBuyPrice, mineralSellPrice, itemSellPrice,
     buyItem, sellItem, buyMineral, sellMineral,

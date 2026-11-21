@@ -138,3 +138,16 @@ test('stage gating for minerals and enemies', () => {
   assert.equal(L.pickMineral(1, Math.random), 'copper');
   assert.ok(L.enemyStats('slug', 5).maxHp > L.enemyStats('slug', 1).maxHp);
 });
+
+test('knockback stays inside level bounds and preserves longer stuns', () => {
+  const hero = { x: 50, w: 34, facing: 1 };
+  const enemy = { x: 90, w: 40, stun: 1 };
+  L.knockBackEnemy(enemy, hero, 140);
+  assert.equal(enemy.x, 100);
+  assert.equal(enemy.stun, 1);
+  enemy.x = 10;
+  enemy.stun = 0;
+  L.knockBackEnemy(enemy, hero, 140);
+  assert.equal(enemy.x, 0);
+  assert.ok(enemy.stun > 0);
+});

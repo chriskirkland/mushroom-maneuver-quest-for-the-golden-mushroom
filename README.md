@@ -5,8 +5,9 @@ A simple browser-based side-scroller starring a cute button mushroom (beige stem
 ## Gameplay
 
 - **Explore levels** – run and jump through side-scrolling levels.
-- **Mine minerals** – swing at ore rocks to collect Copper, Iron, Silver, Gold and Spore Crystals (rarer ores appear in later levels).
-- **Fight baddies** – Slime Slugs, Bark Beetles, Spore Bats, Rot Goblins and Toad Knights drop coins (and sometimes potions).
+- **Mine minerals** – swings at ore rocks show a pickaxe without changing your equipped weapon. Collect Copper, Iron, Silver, Gold and Spore Crystals (rarer ores appear in later levels).
+- **Fight baddies** – every weapon knocks enemies back slightly and briefly stuns them. Slime Slugs, Bark Beetles, Spore Bats, Rot Goblins and Toad Knights drop coins (and sometimes potions).
+- **Defeat bosses** – a crowned Toad King guards the town gate every third level (3, 6, 9, …). Defeat it to enter town.
 - **Visit the town** at the end of each level:
   - 🏪 **Market** – buy & sell items and minerals.
   - 🔨 **Blacksmith** – craft weapons & armor from minerals.
