@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mushroom Maneuver: Quest for the Golden Mushroom</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" width="960" height="540" aria-label="Mushroom Maneuver game"></canvas>
+
+    <div id="menu" class="overlay">
+      <h1>Mushroom Maneuver</h1>
+      <h2>Quest for the Golden Mushroom</h2>
+      <div class="menu-buttons">
+        <button id="btn-continue">Continue</button>
+        <button id="btn-new">New Game</button>
+      </div>
+      <div class="controls">
+        <p><b>← → / A D</b> move &nbsp; <b>↑ / W / Space</b> jump</p>
+        <p><b>J / X</b> swing (fight baddies &amp; mine minerals) &nbsp; <b>Q</b> drink potion</p>
+        <p>Reach the town at the end of each level to trade, craft, visit the King &mdash; and save your progress.</p>
+      </div>
+    </div>
+
+    <div id="town" class="overlay hidden">
+      <div id="town-header"></div>
+      <div id="town-tabs">
+        <button data-tab="market">🏪 Market</button>
+        <button data-tab="smith">🔨 Blacksmith</button>
+        <button data-tab="castle">🏰 Castle</button>
+        <button data-tab="satchel">🎒 Satchel</button>
+      </div>
+      <div id="town-body"></div>
+      <div id="town-footer">
+        <span id="town-msg"></span>
+        <button id="btn-leave">Leave town ➜</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/logic.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

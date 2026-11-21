@@ -1,0 +1,135 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2b1d14;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  color: #3e2723;
+}
+
+#wrap {
+  position: relative;
+  flex: none;
+  width: 968px;
+  height: 548px;
+  transform-origin: center center;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  border: 4px solid #5d4037;
+  border-radius: 8px;
+  background: #87ceeb;
+}
+
+.overlay {
+  position: absolute;
+  inset: 4px;
+  border-radius: 6px;
+}
+
+.hidden { display: none !important; }
+
+#menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 0 6px;
+  text-align: center;
+  pointer-events: none;
+}
+
+#menu h1 {
+  margin: 0;
+  font-size: 54px;
+  color: #d32f2f;
+  text-shadow: 3px 3px 0 #fff3e0, 5px 5px 0 #5d4037;
+}
+
+#menu h2 {
+  margin: 6px 0 0;
+  font-size: 26px;
+  color: #f9a825;
+  text-shadow: 2px 2px 0 #5d4037;
+}
+
+.menu-buttons {
+  margin-top: 12px;
+  display: flex;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+.controls {
+  margin-top: auto;
+  background: rgba(255, 248, 225, 0.85);
+  padding: 4px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.controls p { margin: 4px 0; }
+
+button {
+  font: inherit;
+  font-weight: bold;
+  padding: 8px 18px;
+  border: 3px solid #5d4037;
+  border-radius: 8px;
+  background: #ffe0b2;
+  color: #3e2723;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { background: #ffcc80; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+#town {
+  inset: 18px 18px 18px auto;
+  width: 600px;
+  background: rgba(255, 248, 225, 0.96);
+  border: 3px solid #5d4037;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  font-size: 14px;
+}
+
+#town-header { font-size: 13px; margin-bottom: 6px; }
+#town-header h3 { margin: 0 0 4px; color: #d32f2f; font-size: 18px; }
+
+#town-tabs { display: flex; gap: 6px; margin-bottom: 6px; }
+#town-tabs button { padding: 4px 10px; font-size: 13px; }
+#town-tabs button.active { background: #d32f2f; color: #fff; }
+
+#town-body {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 2px dashed #bcaaa4;
+  padding-top: 6px;
+}
+
+#town-body h4 { margin: 8px 0 4px; }
+
+#town-body table { width: 100%; border-collapse: collapse; }
+#town-body td { padding: 3px 4px; border-bottom: 1px solid #efebe9; }
+#town-body td:last-child { text-align: right; white-space: nowrap; }
+#town-body button { padding: 2px 8px; font-size: 12px; border-width: 2px; }
+.king-says { font-style: italic; background: #fff3e0; padding: 6px; border-radius: 6px; }
+
+#town-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  gap: 8px;
+}
+
+#town-msg { font-weight: bold; color: #6d4c41; }
